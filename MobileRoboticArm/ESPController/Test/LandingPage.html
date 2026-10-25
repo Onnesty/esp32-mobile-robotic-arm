@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+   <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Queue Page</title>
+    </head>
+    
+    <body>
+        
+      <div id = "Container">
+
+        <div id = "MessageContainer">
+
+          <div id = "TitleMessage" class = "Message"> Status | </div>
+
+          <div id = "StatusMessage" class = "Message"> • Checking </div>
+        
+        </div>
+          
+        <button type = "button" id = "Button"> Start Controls </button>
+
+      </div>
+
+  </body>
+
+    <script>
+
+      const ButtonElement = document.getElementById("Button");
+      const StatusElement = document.getElementById("StatusMessage");
+
+      ButtonElement.addEventListener("click", () => {
+        window.location.href = "/ControlPage";    
+      })
+      
+      
+
+      const GetControlsStatus = async () => {
+       
+        const Res = await fetch("/GetStatus");
+        const Data = await Res.json();
+
+        if (Data.IsBusy) {
+          StatusElement.textContent = "• Busy";
+          StatusElement.style.color = "#e74c3c";
+          ButtonElement.disabled = true;
+
+        } else {
+          StatusElement.textContent = "• Available";
+          StatusElement.style.color = "#27ae60";
+          ButtonElement.disabled = false;
+
+        }
+
+        
+      }
+      
+      GetControlsStatus();
+      setInterval(GetControlsStatus, 500); // Poll every 500ms
+
+
+    </script>
+
+
+    <style>
+      body {
+        display: flex;
+        background-color: #1f1f1f;
+        align-items:center;
+        justify-content: center;
+
+        height: 100vh;
+        width: 100vw;
+
+        overflow: hidden;
+
+      }
+
+      #Container {
+
+        display: flex;
+        flex-direction: column;
+        background-color: #1f1f1f;
+        align-items:center;
+        justify-content: center;
+
+        gap: 30px;
+
+        height: 50%;
+        width: 50%;
+
+
+
+
+      }
+
+      #MessageContainer {
+
+        height: auto;
+    
+        padding: 30px;
+
+        display: flex;
+        align-items:center;
+        justify-content: center;
+
+        background-color: white;
+
+        border: none;
+        border-radius: 20px;
+
+        gap: 10px;
+      }
+
+      .Message {
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: clamp(16px, 2vw, 32px);
+        color: #1f1f1f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        
+
+      }
+
+      #TitleMessage{
+        
+        font-weight: bold;
+
+
+      }
+
+      #StatusMessage {
+        color: lightslategray;
+      }
+
+     
+      #Button {
+
+        border-radius: 20px;
+        border: none;
+
+        cursor: pointer;
+
+        padding: 20px;
+
+        background-color: white;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: clamp(14px, 1.2vw, 24px);
+        color: #1f1f1f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        white-space: nowrap;
+        
+
+      }
+    </style>
+   </html>

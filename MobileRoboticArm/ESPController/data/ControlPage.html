@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+   <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Control Page</title>
+    </head>
+    
+    <body>
+
+      <button type = "button" id = "Exit"> 
+        
+        <img src = "/Exit.png" alt = "Exit" id = "ExitImage" >
+
+      </button>
+
+      <div class = "MasterContainer">
+
+        <div class = "Message"> MOVEMENT </div>
+         
+        <div class = "ControlContainer">
+          
+          <button type = "button" id = "ForwardButton" class = "UpButton" > 
+            <img src = "/Up.png" alt = "Up" >
+          </button>
+
+          <button type = "button" id = "BackwardButton" class = "DownButton" > 
+            <img src = "/Down.png" alt = "Down" >
+          </button>
+
+          <button type = "button" id = "TurnLeftButton" class = "LeftButton" > 
+            <img src = "/Left.png" alt = "Left" >
+          </button>
+
+          <button type = "button" id = "TurnRightButton" class = "RightButton" > 
+            <img src = "/Right.png" alt = "Right" >
+          </button>
+
+        </div>
+
+      </div>
+    
+
+      <div class = "MasterContainer"> 
+
+        <div class = "Message"> ARM </div>
+
+        <div class = "ControlContainer">
+            
+          <button type = "button" id = "SwingUpButton" class = "UpButton" > 
+            <img src = "/Up.png" alt = "Up" >
+          </button>
+
+          <button type = "button" id = "SwingDownButton" class = "DownButton" > 
+            <img src = "/Down.png" alt = "Down" >
+          </button>
+
+          <button type = "button" id = "SwingLeftButton" class = "LeftButton" > 
+            <img src = "/Left.png" alt = "Left" >
+          </button>
+
+          <button type = "button" id = "SwingRightButton" class = "RightButton" > 
+            <img src = "/Right.png" alt = "Right" >
+          </button>
+
+
+          <button type = "button" id = "ClawOpenButton" > 
+            <img src = "/Open.png" alt = "ClawOpen">
+          </button>
+
+          <button type = "button" id = "ClawCloseButton" > 
+            <img src = "/Close.png" alt = "ClawClose">
+          </button>
+
+
+        </div>
+      
+      </div>
+
+    </body>
+
+    <script>
+
+      /* 
+
+      COMMANDS: 
+
+      0x00 : Stop
+      0x01 : Forward
+      0x02 : Backward
+      0x03 : Left
+      0x04 : Right
+      0x05 : SwingLeft
+      0x06 : SwingRight
+      0x07 : SwingUp
+      0x08 : SwingDown
+      0x09 : ClawOpen
+      0x0A : ClawClose
+      
+      */
+
+      const WSocket = new WebSocket("ws://192.168.69.1/ws");
+
+      WSocket.binaryType = "arraybuffer";
+
+      WSocket.onclose = () => { // If too far from ESP
+        alert("Connection lost! Redirecting...");
+        window.location.href = "/";
+      };
+
+      const CleanUpConnection = () => {
+        if (WSocket.readyState === WebSocket.OPEN) {
+          SendCommand(0x00); 
+          WSocket.close();
+
+        }
+      };
+
+      // Triggers when the user closes the tab, navigates away, or minimizes the browser
+      window.addEventListener("pagehide", CleanUpConnection);
+      window.addEventListener("beforeunload", CleanUpConnection);
+
+
+      const SendCommand = (Command) => {
+        
+        if (WSocket.readyState === WebSocket.OPEN) {
+
+          const Buffer = new Uint8Array([Command]);
+          WSocket.send(Buffer);
+          console.log(`Sent Command 0x${Command }`)
+
+        }
+
+        
+
+      }
+
+      const ButtonIDList = ["ForwardButton", "BackwardButton", "TurnLeftButton", "TurnRightButton", "SwingUpButton", 
+      "SwingDownButton", "SwingLeftButton", "SwingRightButton", "ClawOpenButton", "ClawCloseButton"];
+
+      const ButtonCommands = [0x01, 0x02, 0x03, 0x04, 0x07, 0x08, 0x05, 0x06, 0x09, 0x0A]; 
+
+      for (let i = 0 ; i < ButtonIDList.length; i++) {
+
+        const ButtonElement = document.getElementById(ButtonIDList[i]);
+
+        // PC Listeners 
+        ButtonElement.addEventListener("mousedown", () => { SendCommand(ButtonCommands[i]); console.log(ButtonIDList[i]) } );
+        ButtonElement.addEventListener("mouseup", () => SendCommand(0x00) );
+        ButtonElement.addEventListener("mouseleave", () => SendCommand(0x00) );
+        
+        // Mobile Listeners
+        ButtonElement.addEventListener("touchstart", (e) => { e.preventDefault(); SendCommand(ButtonCommands[i])} );
+        ButtonElement.addEventListener("touchend", (e) => { e.preventDefault(); SendCommand(0x00)} );
+        ButtonElement.addEventListener("touchcancel", (e) => { e.preventDefault(); SendCommand(0x00) });
+
+
+      }
+
+      const ExitButton = document.getElementById("Exit");
+
+      ExitButton.addEventListener("click", () => {
+        CleanUpConnection();
+        window.location.href = "/";
+
+      } )
+
+
+
+    </script>
+
+
+    <style>
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none; /* Prevents text selection on rapid tapping */
+        -webkit-user-select: none;
+      }
+
+      body {
+        display: flex;
+        background-color: #141414;
+        align-items:center;
+        justify-content: center;
+
+        height: 100vh;
+        width: 100vw;
+
+        overflow: scroll;
+
+
+        position: relative;
+
+        font-family: "Century Gothic", sans-serif;
+        
+
+      }
+
+      body::-webkit-scrollbar {
+        display: none;
+      }
+      
+      #Exit {
+
+        position: absolute;
+        top: 5px;
+        left: 5px;
+
+        gap: 5px;
+
+        padding: 10px;
+        padding-right: 15px;
+
+
+
+        background-color: #e74c3c;
+
+        border-radius: 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+
+      }
+
+      #ExitImage {
+        width: 24px;
+        aspect-ratio: 1/1;
+        
+      }
+
+
+      .MasterContainer {
+        
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        height: 100%;
+        width: 50%;
+
+        gap: 3%;
+
+      }
+
+      .Message {
+
+        font-size: clamp(16px, 2.5vw, 32px);
+        font-weight: bold;
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        height: auto;
+        width: 100%;
+
+        white-space: nowrap;
+        
+      }
+
+      .ControlContainer {
+        
+        aspect-ratio: 1/1;
+
+        width: min(90%, 80vh);
+
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+
+
+      }
+
+      button {
+
+        background-color: #1f1f1f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 15px;
+
+        border: none;
+
+      }
+
+      button:hover {
+
+        background-color: lightslategray;
+      }
+
+      img {
+        
+        width: 80%;
+        aspect-ratio: 1/1;
+
+        object-fit: contain;  /* Prevents arrow distortion */
+        pointer-events: none; /* Prevents drag-and-drop on touch devices */
+      }
+
+      .UpButton {
+        grid-row: 1;
+        grid-column: 2;
+
+
+      }
+
+      .DownButton {
+        grid-row: 3;
+        grid-column: 2;
+        
+      }
+
+      .LeftButton {
+        grid-row: 2;
+        grid-column: 1;
+        
+
+      }
+
+      .RightButton {
+        grid-row: 2;
+        grid-column: 3;
+        
+      }
+
+      #ClawOpenButton {
+
+        grid-row: 2;
+        grid-column: 1;
+
+      }
+
+      #ClawCloseButton {
+
+        grid-row: 2;
+        grid-column: 3;
+
+      }
+      
+    </style>
+   </html>
